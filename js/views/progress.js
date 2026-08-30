@@ -147,8 +147,8 @@ function renderMilestones(completed30, symmetry, chestTrend, navelTrend) {
   return `<div class="card mt-4"><p class="h3">אבני דרך</p><div class="stack stack--sm mt-2">${items.map(i => `<p class="body-lg">✓ ${esc(i)}</p>`).join('')}</div></div>`;
 }
 
-function promptBodyweight(container) {
-  const val = prompt('משקל נוכחי (ק"ג)?');
+async function promptBodyweight(container) {
+  const val = await showInputModal({ title: 'עדכון משקל', label: 'משקל נוכחי (ק"ג)', inputType: 'number', placeholder: 'למשל 78' });
   const num = Number(val);
   if (!num) return;
   FORMA_DB.addBodyweightLog({ date: new Date().toISOString().slice(0, 10), weightKg: num });

@@ -83,9 +83,8 @@ FORMA_VIEWS.workoutLive = {
           </div>
         </div>
 
-        <div class="media-frame">
-          <div class="text-center muted"><div style="margin-bottom:8px">${ICONS.play}</div><p class="body-sm">${esc(ex.cues?.[0] || '')}</p></div>
-        </div>
+        ${renderVideoFrame(ex.videoYoutubeId, ex.nameHe)}
+        ${ex.cues?.[0] ? `<p class="body-sm text-center mt-2 muted">${esc(ex.cues[0])}</p>` : ''}
 
         <div class="prev-perf">${prevSameIndex ? `לפני: <b class="ltr-num">${prevSameIndex.weight}</b> ק"ג × <b class="ltr-num">${prevSameIndex.reps}</b> (RPE <span class="ltr-num">${prevSameIndex.rpe}</span>)` : 'אין עדיין היסטוריה בתרגיל הזה'}</div>
 
@@ -144,13 +143,16 @@ FORMA_VIEWS.workoutLive = {
         else { rpe = Math.min(10, Math.max(5, Math.round((rpe + dir * 0.5) * 2) / 2)); root.querySelector('#rpe-val').textContent = rpe; }
       }));
 
+      wireVideoFrames(root);
+
       root.querySelector('#warmup-toggle').addEventListener('click', (e) => {
         pendingWarmup = !pendingWarmup;
         e.target.setAttribute('aria-pressed', pendingWarmup ? 'true' : 'false');
       });
 
       root.querySelector('#live-close').addEventListener('click', () => {
-        if (confirm('לצאת מהאימון? הסטים שנשמרו יישארו.')) FORMA_ROUTER.navigate('/today');
+        showConfirmModal({ title: 'לצאת מהאימון?', message: 'הסטים שנשמרו יישארו.', confirmLabel: 'צא מהאימון', cancelLabel: 'המשך אימון' })
+          .then(ok => { if (ok) FORMA_ROUTER.navigate('/today'); });
       });
       root.querySelector('#live-quiet').addEventListener('click', () => {
         const s = FORMA_DB.getSettings(); FORMA_DB.saveSettings({ quietMode: !s.quietMode });

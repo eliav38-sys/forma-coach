@@ -219,7 +219,7 @@ function addCustomExercise(day, container) {
   const overrides = FORMA_DB.getExerciseOverrides();
   overrides[id] = {
     id, nameHe: name, nameEn: name, primary: null, secondary: [], feel: '', cues: [], mistakes: [],
-    tempo: '', breathing: '', rom: '', substitutes: [], videoUrl: null, custom: true
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: null, custom: true
   };
   localStorage.setItem('forma:v1:exercisesOverride', JSON.stringify(overrides));
 
@@ -251,9 +251,7 @@ FORMA_VIEWS.exerciseDetail = {
     container.innerHTML = `
       <div class="view">
         ${topbar('תרגיל', { back: true })}
-        <div class="media-frame">
-          ${ex.videoUrl ? `<video src="${esc(ex.videoUrl)}" muted loop autoplay playsinline></video>` : `<div class="text-center muted"><div style="margin-bottom:8px">${ICONS.play}</div><p class="body-sm">אין עדיין סרטון הדגמה — אפשר להוסיף קישור בעתיד</p></div>`}
-        </div>
+        ${renderVideoFrame(ex.videoYoutubeId, ex.nameHe)}
 
         <h2 class="h1 mt-4">${esc(ex.nameHe)}</h2>
         <p class="body-sm ltr" style="direction:ltr">${esc(ex.nameEn)}</p>
@@ -297,6 +295,7 @@ FORMA_VIEWS.exerciseDetail = {
       </div>
     `;
     wireTopbarBack(container, '/training');
+    wireVideoFrames(container);
     container.querySelector('#unclear-btn').addEventListener('click', () => {
       sessionStorage.setItem('forma:coach:context', JSON.stringify({ intentId: 'why-exercise', exerciseId: ex.id }));
       FORMA_ROUTER.navigate('/coach/chat');

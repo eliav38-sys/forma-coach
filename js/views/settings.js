@@ -10,7 +10,8 @@ FORMA_VIEWS.settings = {
 
         <div class="card">
           <p class="h3">${esc(profile.displayName || '')}</p>
-          <p class="body-sm mt-1">כל הנתונים נשמרים מקומית במכשיר הזה בלבד. אין עדיין חיבור לשרת חיצוני.</p>
+          <p class="body-sm mt-1">כל הנתונים האישיים (סטים, מדידות, התאוששות) נשמרים מקומית במכשיר הזה בלבד ולא נשלחים לשום מקום.</p>
+          <p class="body-sm mt-2">${FORMA_AI_WORKER_URL ? `${statusChip('good', 'Coach מחובר ל-Claude')} כשיש רשת. שאלה חופשית בצ׳אט נשלחת יחד עם תקציר נתונים לצורך התשובה בלבד.` : `${statusChip('neutral', 'Coach במצב מקומי')} עדיין לא חובר מודל חי — התשובות מבוססות-נתונים אמיתיים, רק בלי ניסוח חופשי של Claude.`}</p>
         </div>
 
         <p class="eyebrow mt-6">תצוגה</p>
@@ -62,9 +63,18 @@ FORMA_VIEWS.settings = {
     container.querySelector('#export-json').addEventListener('click', () => downloadFile('forma-export.json', JSON.stringify(FORMA_DB.exportAll(), null, 2), 'application/json'));
     container.querySelector('#export-csv').addEventListener('click', () => downloadFile('forma-sets.csv', setsToCsv(FORMA_DB.getSetLogs()), 'text/csv'));
 
-    container.querySelector('#wipe-photos').addEventListener('click', () => { if (confirm('למחוק את כל התמונות?')) { FORMA_DB.wipeCategory('photos'); localStorage.removeItem('forma:v1:photoIndex'); FORMA_APP.toast('התמונות נמחקו'); } });
-    container.querySelector('#wipe-nutrition').addEventListener('click', () => { if (confirm('למחוק את כל נתוני התזונה?')) { FORMA_DB.wipeCategory('nutrition'); FORMA_APP.toast('נתוני התזונה נמחקו'); } });
-    container.querySelector('#wipe-all').addEventListener('click', () => { if (confirm('למחוק את כל החשבון? פעולה זו בלתי הפיכה.')) { FORMA_DB.wipeAll(); location.hash = '#/onboarding'; location.reload(); } });
+    container.querySelector('#wipe-photos').addEventListener('click', async () => {
+      const ok = await showConfirmModal({ title: 'למחוק את כל התמונות?', confirmLabel: 'מחק', danger: true });
+      if (ok) { FORMA_DB.wipeCategory('photos'); localStorage.removeItem('forma:v1:photoIndex'); FORMA_APP.toast('התמונות נמחקו'); }
+    });
+    container.querySelector('#wipe-nutrition').addEventListener('click', async () => {
+      const ok = await showConfirmModal({ title: 'למחוק את כל נתוני התזונה?', confirmLabel: 'מחק', danger: true });
+      if (ok) { FORMA_DB.wipeCategory('nutrition'); FORMA_APP.toast('נתוני התזונה נמחקו'); }
+    });
+    container.querySelector('#wipe-all').addEventListener('click', async () => {
+      const ok = await showConfirmModal({ title: 'למחוק את כל החשבון?', message: 'פעולה זו בלתי הפיכה.', confirmLabel: 'מחק הכל', danger: true });
+      if (ok) { FORMA_DB.wipeAll(); location.hash = '#/onboarding'; location.reload(); }
+    });
   }
 };
 

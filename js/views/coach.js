@@ -77,12 +77,22 @@ FORMA_VIEWS.coachChat = {
 
     if (pendingContext) sendToCoach(null, null, pendingContext);
 
-    function sendToCoach(text, intentId, contextOverride) {
+    async function sendToCoach(text, intentId, contextOverride) {
       const userText = text || FORMA_COACH.QUICK_PROMPTS.find(p => p.id === intentId)?.textHe || 'שאלה';
       const userMsg = FORMA_DB.addCoachMessage({ role: 'user', content: userText });
       scroll.appendChild(renderMsg(userMsg));
-      const res = FORMA_COACH.ask(text, contextOverride || { intentId });
-      const coachMsg = FORMA_DB.addCoachMessage({ role: 'coach', content: res.direct_answer, referencedData: res.reasoning_summary, confidence: res.confidence, actions: res.actions, safety: res.safety });
+      scroll.scrollTop = scroll.scrollHeight;
+
+      const typingEl = document.createElement('div');
+      typingEl.className = 'msg msg--coach msg--typing';
+      typingEl.innerHTML = `<span class="typing-dots"><span></span><span></span><span></span></span>`;
+      scroll.appendChild(typingEl);
+      scroll.scrollTop = scroll.scrollHeight;
+
+      const res = await FORMA_COACH.askSmart(userText, contextOverride || { intentId });
+      typingEl.remove();
+
+      const coachMsg = FORMA_DB.addCoachMessage({ role: 'coach', content: res.direct_answer, referencedData: res.reasoning_summary, confidence: res.confidence, actions: res.actions, safety: res.safety, source: res.source || 'local' });
       scroll.appendChild(renderMsg(coachMsg));
       scroll.scrollTop = scroll.scrollHeight;
     }
@@ -95,15 +105,17 @@ FORMA_VIEWS.coachChat = {
       } else {
         el.className = 'msg msg--coach';
         el.innerHTML = `
+          ${m.source === 'live' ? `<span class="live-badge">${ICONS.bolt} Claude</span>` : ''}
           <p>${esc(m.content)}</p>
           ${m.referencedData?.length ? `<p class="reason">${m.referencedData.map(esc).join(' · ')}</p>` : ''}
           ${m.safety?.message && m.safety.message !== m.content ? `<p class="reason" style="color:var(--status-low-ink)">${esc(m.safety.message)}</p>` : ''}
           ${m.confidence ? `<p class="confidence">רמת ביטחון: ${confidenceHe(m.confidence)}</p>` : ''}
-          ${m.actions?.length ? `<div class="suggested-row">${m.actions.map((a, i) => `<button class="chip" data-action-idx="${i}">${esc(a.label)}</button>`).join('')}</div>` : ''}
+          ${m.actions?.filter(a => a.type !== 'none').length ? `<div class="suggested-row">${m.actions.filter(a => a.type !== 'none').map((a, i) => `<button class="chip" data-action-idx="${i}">${esc(a.label)}</button>`).join('')}</div>` : ''}
         `;
-        if (m.actions?.length) {
+        const realActions = (m.actions || []).filter(a => a.type !== 'none');
+        if (realActions.length) {
           setTimeout(() => {
-            el.querySelectorAll('[data-action-idx]').forEach(btn => btn.addEventListener('click', () => runCoachAction(m.actions[Number(btn.dataset.actionIdx)])));
+            el.querySelectorAll('[data-action-idx]').forEach(btn => btn.addEventListener('click', () => runCoachAction(realActions[Number(btn.dataset.actionIdx)])));
           }, 0);
         }
       }
@@ -115,12 +127,23 @@ FORMA_VIEWS.coachChat = {
 function confidenceHe(c) { return { low: 'נמוכה', medium: 'בינונית', high: 'גבוהה' }[c] || c; }
 
 function runCoachAction(action) {
+  action = action || {};
+  action.parameters = action.parameters || {};
+  // Live (Claude-generated) actions carry a type/label but no internal IDs —
+  // resolve today's actual scheduled day rather than trust a guessed one.
+  if (!action.parameters.dayId && ['reduce_volume', 'reduce_load', 'keep', 'import_day'].includes(action.type)) {
+    const today = todaysActivity();
+    if (today.dayId) action.parameters.dayId = today.dayId;
+  }
   switch (action.type) {
-    case 'import_day': FORMA_ROUTER.navigate(`/training/day/${action.parameters.dayId}`); break;
+    case 'import_day':
+      if (action.parameters.dayId) FORMA_ROUTER.navigate(`/training/day/${action.parameters.dayId}`);
+      break;
     case 'schedule_measurement': FORMA_ROUTER.navigate('/progress/measure'); break;
     case 'nutrition_suggestion': FORMA_ROUTER.navigate('/coach/nutrition'); break;
     case 'swap_exercise':
       if (action.parameters?.exerciseId) FORMA_ROUTER.navigate(`/training/exercise/${action.parameters.exerciseId}`);
+      else FORMA_APP.toast('אפשר לשאול על תרגיל ספציפי מתוך מסך התרגיל שלו.');
       break;
     case 'reduce_volume':
     case 'reduce_load':

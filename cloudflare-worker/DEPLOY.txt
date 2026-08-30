@@ -1,0 +1,50 @@
+חיבור FORMA Coach ל-Claude האמיתי — הוראות פריסה
+====================================================
+
+זה קורה כולו בדפדפן שלך, בחשבונות שלך. אני לא רואה ולא נוגע במפתח ה-API
+שלך בשום שלב — הוא מוקלד ישירות לתוך שדה הסודות של Cloudflare.
+
+שלב 1 — מפתח Anthropic
+-----------------------
+1. היכנס ל-console.anthropic.com (או צור חשבון אם אין לך).
+2. Settings → API Keys → Create Key. העתק את המפתח (מתחיל ב-sk-ant-...).
+3. מומלץ: תחת Settings → Limits, הגדר תקרת הוצאה חודשית — זה אפליקציה
+   אישית וה-Worker כבר מוגבל ל-effort נמוך ו-2000 טוקנים לתשובה, אבל
+   תקרה זה תמיד ביטוח טוב.
+
+שלב 2 — יצירת ה-Worker
+------------------------
+1. היכנס ל-dash.cloudflare.com (חשבון חינמי מספיק).
+2. בתפריט הצד: Workers & Pages → Create → Create Worker.
+3. תן לו שם (למשל forma-coach-worker) → Deploy (זה יוצר גרסת ברירת מחדל,
+   נחליף אותה עוד רגע).
+4. לחץ Edit code (או "Quick edit").
+5. מחק את כל הקוד שם, והדבק במקומו את כל התוכן של הקובץ
+   coach-worker.js מהתיקייה הזו.
+6. לחץ Deploy / Save and Deploy.
+
+שלב 3 — הגדרת הסודות
+----------------------
+1. במסך ה-Worker: Settings → Variables and Secrets → Add.
+2. הוסף:
+   - שם: ANTHROPIC_API_KEY   ערך: המפתח מ-console.anthropic.com   סוג: Secret
+   - שם: ALLOWED_ORIGIN       ערך: https://eliav38-sys.github.io   סוג: Secret (או Text)
+3. שמור. ה-Worker מסתמך על env.ANTHROPIC_API_KEY ו-env.ALLOWED_ORIGIN —
+   אין שום מפתח כתוב בקוד עצמו.
+
+שלב 4 — קבלת הכתובת
+---------------------
+בראש מסך ה-Worker תראה כתובת כמו:
+https://forma-coach-worker.<שם-החשבון-שלך>.workers.dev
+
+שלח לי את הכתובת הזו (היא לא סודית — זו רק נקודת הכניסה הציבורית).
+אני אכניס אותה ל-js/ai-config.js ואעלה גרסה מעודכנת ל-GitHub Pages —
+מהרגע הזה, המאמן ב-FORMA באמת מדבר עם Claude.
+
+מה אם משהו נכשל?
+------------------
+- אם אין רשת/אין תגובה מה-Worker: FORMA חוזרת אוטומטית למנוע המקומי
+  שכבר עובד (אותן תשובות מבוססות-נתונים כמו עכשיו) — הצ'אט לא נתקע.
+- לבדוק שה-Worker באמת עובד: פתח בדפדפן כלי כמו Postman או הרץ ב-Console:
+  fetch('<כתובת ה-Worker>', {method:'POST', headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({userMessage:'מה לעשות היום?', contextText:'בדיקה'})}).then(r=>r.json()).then(console.log)

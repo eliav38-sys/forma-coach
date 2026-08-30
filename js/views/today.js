@@ -107,7 +107,7 @@ function renderRing(score, tone) {
   const color = `var(${toneVarMap[tone] || '--accent'})`;
   return `<div class="ring" style="width:${size}px;height:${size}px;flex:none">
     <svg viewBox="0 0 ${size} ${size}">
-      <circle class="ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"/>
+      <circle class="ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" ${score == null ? 'stroke-dasharray="3 5"' : ''}/>
       <circle cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" fill="none" stroke="${color}" stroke-linecap="round"
         stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct)}" style="transition:stroke-dashoffset .7s ease"/>
     </svg>

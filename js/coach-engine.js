@@ -1,10 +1,13 @@
-/* FORMA Coach — deterministic, data-grounded reasoning engine.
-   There is no live LLM wired into this build (see README): every sentence
-   below is generated from real local data through the domain modules, never
-   invented. This intentionally satisfies the PRD's "no fake precision" and
-   "coach never invents a weight, circumference or workout" rules by
-   construction. Swap in a real model later behind the same `ask()` contract
-   (section 14.2) without touching the views. */
+/* FORMA Coach — two-layer engine.
+   Layer 1 (this file, always available, offline-safe): `ask()` is a
+   deterministic, data-grounded reasoning engine — every sentence is built
+   from real local data through the domain modules, never invented.
+   Layer 2 (`askSmart`, when FORMA_AI_WORKER_URL is configured and online):
+   calls real Claude via the Cloudflare Worker in /cloudflare-worker, handing
+   it the SAME pre-computed real facts (via buildCoachContextText) so it can
+   only reason and phrase — it never computes or invents a number itself.
+   Any network/offline/server failure transparently falls back to `ask()`,
+   so the Coach never goes silent. */
 
 const FORMA_COACH = (() => {
   const QUICK_PROMPTS = [
@@ -48,6 +51,93 @@ const FORMA_COACH = (() => {
     const recovery = FORMA_DB.getRecoveryLogs();
     const days = FORMA_DB.getWorkoutDays();
     return { profile, sessions, setLogs, measurements, cardio, recovery, days };
+  }
+
+  /** A bounded, real-data-only Hebrew brief handed to the live model — Claude
+      reasons and phrases over these facts, it never computes or invents them. */
+  function buildCoachContextText(ctx) {
+    const lines = [];
+    const profile = ctx.profile;
+    lines.push(`שם: ${profile.displayName || 'אליאב'}. תזונה: ${profile.diet === 'vegetarian' ? 'צמחוני' : profile.diet || 'לא ידוע'}. לא אוהב: ${(profile.dislikes || []).join(', ') || 'לא ידוע'}.`);
+    if (profile.weightKg) lines.push(`משקל נוכחי: ${profile.weightKg} ק"ג.`);
+    if (profile.primaryGoal) lines.push(`יעד מרכזי: ${profile.primaryGoal}${profile.secondaryGoal ? `, יעד משני: ${profile.secondaryGoal}` : ''}.`);
+
+    const today = todaysActivity();
+    const block = currentBlockWeek();
+    lines.push(`היום מתוכנן: ${today.labelHe}. בלוק התקדמות: שבוע ${block.week} מתוך 6 (${block.rpeLabel}, ${block.note}, נפח ${block.volumePct}%).`);
+
+    const rec = FORMA_DB.latestRecovery();
+    if (rec) {
+      const score = computeRecoveryScore(rec.raw);
+      lines.push(`בדיקת התאוששות אחרונה: ציון ${score.score}/100 (${recoveryStatusMeta(score.band).labelHe}). סיבות: ${score.reasons.join(', ') || 'ללא'}.`);
+    } else {
+      lines.push('אין עדיין בדיקת התאוששות היום.');
+    }
+
+    const load = weeklyLoadSummary(ctx.sessions, ctx.cardio);
+    lines.push(`השבוע עד כה: ${load.strengthSessions} אימוני כוח, ${load.runsCount} ריצות (${load.kmThisWeek} ק"מ)${load.legConservative ? ', עלייה חדה בקילומטראז\' — שמרנות מומלצת ברגליים' : ''}.`);
+
+    const chestTrend = trendSummary(ctx.measurements, 'chest_cm', 'חזה');
+    const navelTrend = trendSummary(ctx.measurements, 'navel_cm', 'טבור');
+    if (chestTrend.hasTrend) lines.push(`מגמת חזה: ${chestTrend.message}`);
+    if (navelTrend.hasTrend) lines.push(`מגמת טבור: ${navelTrend.message}`);
+    const sym = armSymmetry(ctx.measurements, 'arm_flexed');
+    if (sym.hasEnoughData) lines.push(`סימטריית זרועות: ${sym.message}`);
+
+    const todaysDay = today.dayId ? ctx.days.find(d => d.id === today.dayId) : null;
+    if (todaysDay) {
+      lines.push(`תרגילי ${todaysDay.name}:`);
+      todaysDay.exercises.forEach(presc => {
+        const ex = FORMA_DB.getExercise(presc.exerciseId);
+        const history = FORMA_DB.exerciseHistory(presc.exerciseId);
+        const prog = evaluateProgression(presc.exerciseId, history, presc);
+        lines.push(`- ${ex?.nameHe} (${ex?.nameEn}): ${presc.sets}×${presc.repLow}–${presc.repHigh} RPE ${presc.rpeLow}–${presc.rpeHigh}. ${prog.message}`);
+      });
+    }
+
+    return lines.join('\n');
+  }
+
+  /** Calls the real Claude connection when configured; throws on any failure
+      so the caller can fall back to the local reasoning engine. */
+  async function askLive(userMessage, ctx) {
+    if (!FORMA_AI_WORKER_URL) throw new Error('no_worker_configured');
+    const contextText = buildCoachContextText(ctx);
+    const res = await fetch(FORMA_AI_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userMessage, contextText })
+    });
+    if (!res.ok) throw new Error('worker_http_' + res.status);
+    const data = await res.json();
+    return {
+      direct_answer: data.direct_answer,
+      reasoning_summary: data.reasoning_summary || [],
+      actions: data.actions || [],
+      confidence: data.confidence || 'medium',
+      missing_data: data.missing_data || [],
+      safety: data.safety || { stop_workout: false, seek_professional_help: false, message: null },
+      source: 'live'
+    };
+  }
+
+  /** Tries the live model first (if configured), transparently falls back to
+      the local rule-based engine on any network/offline/server failure. */
+  async function askSmart(text, context = {}) {
+    const safetyHit = checkTextSafety(text);
+    if (safetyHit.stopWorkout || safetyHit.seekProfessionalHelp) {
+      return respond({ direct: safetyHit.message, confidence: 'high', safety: { stop_workout: safetyHit.stopWorkout, seek_professional_help: true, message: safetyHit.message } });
+    }
+    if (FORMA_AI_WORKER_URL && text) {
+      try {
+        const ctx = buildContext();
+        const live = await askLive(text, ctx);
+        return live;
+      } catch (e) {
+        console.warn('FORMA live coach unavailable, using local reasoning:', e.message);
+      }
+    }
+    return ask(text, context);
   }
 
   function respond({ direct, reasons = [], actions = [], confidence = 'medium', missing = [], safety = null }) {
@@ -260,5 +350,5 @@ const FORMA_COACH = (() => {
     return { headline, bullets };
   }
 
-  return { QUICK_PROMPTS, matchIntent, ask, buildPeriodSummary, buildContext };
+  return { QUICK_PROMPTS, matchIntent, ask, askSmart, buildCoachContextText, buildPeriodSummary, buildContext };
 })();
