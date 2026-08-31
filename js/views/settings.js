@@ -11,7 +11,7 @@ FORMA_VIEWS.settings = {
         <div class="card">
           <p class="h3">${esc(profile.displayName || '')}</p>
           <p class="body-sm mt-1">כל הנתונים האישיים (סטים, מדידות, התאוששות) נשמרים מקומית במכשיר הזה בלבד ולא נשלחים לשום מקום.</p>
-          <p class="body-sm mt-2">${FORMA_AI_WORKER_URL ? `${statusChip('good', 'Coach מחובר ל-Claude')} כשיש רשת. שאלה חופשית בצ׳אט נשלחת יחד עם תקציר נתונים לצורך התשובה בלבד.` : `${statusChip('neutral', 'Coach במצב מקומי')} עדיין לא חובר מודל חי — התשובות מבוססות-נתונים אמיתיים, רק בלי ניסוח חופשי של Claude.`}</p>
+          <p class="body-sm mt-2">${FORMA_AI_WORKER_URL ? `${statusChip('good', 'Coach מחובר ל-Gemini')} כשיש רשת. שאלה חופשית בצ׳אט נשלחת יחד עם תקציר נתונים לצורך התשובה בלבד.` : `${statusChip('neutral', 'Coach במצב מקומי')} עדיין לא חובר מודל חי — התשובות מבוססות-נתונים אמיתיים, רק בלי ניסוח חופשי של מודל.`}</p>
         </div>
 
         <p class="eyebrow mt-6">תוכנית</p>

@@ -1,50 +1,97 @@
-חיבור FORMA Coach ל-Claude האמיתי — הוראות פריסה
-====================================================
+חיבור FORMA Coach ל-Gemini — הוראות פריסה
+==========================================
 
-זה קורה כולו בדפדפן שלך, בחשבונות שלך. אני לא רואה ולא נוגע במפתח ה-API
-שלך בשום שלב — הוא מוקלד ישירות לתוך שדה הסודות של Cloudflare.
+זה קורה כולו בדפדפן שלך, בחשבונות שלך. אני לא רואה, לא מקבל ולא נוגע במפתח
+ה-API שלך בשום שלב — אתה מקליד אותו ישירות לשדה הסודות של Cloudflare.
+אל תשלח לי אותו בצ׳אט. אם בטעות הדבקת מפתח באיזשהו מקום פומבי — מחק אותו
+ב-Google AI Studio וצור אחד חדש.
 
-שלב 1 — מפתח Anthropic
------------------------
-1. היכנס ל-console.anthropic.com (או צור חשבון אם אין לך).
-2. Settings → API Keys → Create Key. העתק את המפתח (מתחיל ב-sk-ant-...).
-3. מומלץ: תחת Settings → Limits, הגדר תקרת הוצאה חודשית — זה אפליקציה
-   אישית וה-Worker כבר מוגבל ל-effort נמוך ו-2000 טוקנים לתשובה, אבל
-   תקרה זה תמיד ביטוח טוב.
+למה Gemini ולא Claude: ל-Gemini יש שכבה חינמית אמיתית (Free tier) שמספיקה
+בגדול לשימוש אישי, בלי להוסיף אמצעי תשלום. זה בדיוק מה שחסם אותנו קודם.
+
+
+שלב 1 — מפתח Gemini (חינם)
+---------------------------
+1. היכנס ל-https://aistudio.google.com/apikey עם חשבון Google.
+2. לחץ "Create API key".
+3. בחר פרויקט (או תן לו ליצור אחד חדש) והעתק את המפתח.
+4. שמור אותו רגע בצד — תדביק אותו ישירות ל-Cloudflare בשלב 3.
+
+הערה על עלות: המפתח בברירת מחדל על ה-Free tier. כל עוד לא הוספת חשבונית
+(Billing) לפרויקט, אין חיוב — פשוט מגיעים למכסה והבקשות נעצרות עד למחרת.
+
 
 שלב 2 — יצירת ה-Worker
-------------------------
-1. היכנס ל-dash.cloudflare.com (חשבון חינמי מספיק).
+-----------------------
+1. היכנס ל-https://dash.cloudflare.com (חשבון חינמי מספיק).
 2. בתפריט הצד: Workers & Pages → Create → Create Worker.
-3. תן לו שם (למשל forma-coach-worker) → Deploy (זה יוצר גרסת ברירת מחדל,
-   נחליף אותה עוד רגע).
-4. לחץ Edit code (או "Quick edit").
+3. תן לו שם (למשל forma-coach-worker) → Deploy.
+   (זה יוצר גרסת ברירת מחדל, מחליפים אותה בשלב הבא.)
+4. לחץ "Edit code".
 5. מחק את כל הקוד שם, והדבק במקומו את כל התוכן של הקובץ
    coach-worker.js מהתיקייה הזו.
-6. לחץ Deploy / Save and Deploy.
+6. לחץ Deploy.
 
-שלב 3 — הגדרת הסודות
+
+שלב 3 — הגדרת המשתנים
 ----------------------
-1. במסך ה-Worker: Settings → Variables and Secrets → Add.
-2. הוסף:
-   - שם: ANTHROPIC_API_KEY   ערך: המפתח מ-console.anthropic.com   סוג: Secret
-   - שם: ALLOWED_ORIGIN       ערך: https://eliav38-sys.github.io   סוג: Secret (או Text)
-3. שמור. ה-Worker מסתמך על env.ANTHROPIC_API_KEY ו-env.ALLOWED_ORIGIN —
-   אין שום מפתח כתוב בקוד עצמו.
+במסך ה-Worker: Settings → Variables and Secrets → Add.
+
+הוסף שני משתנים:
+
+  שם:  GEMINI_API_KEY
+  ערך: המפתח מ-Google AI Studio
+  סוג: Secret            ← חשוב שיהיה Secret ולא Text
+
+  שם:  ALLOWED_ORIGIN
+  ערך: https://eliav38-sys.github.io
+  סוג: Text
+
+שמור ולחץ Deploy שוב.
+
+ה-Worker קורא רק את env.GEMINI_API_KEY ו-env.ALLOWED_ORIGIN — אין שום מפתח
+כתוב בתוך הקוד עצמו, ולכן בטוח שהקוד יושב ב-GitHub באופן פומבי.
+
 
 שלב 4 — קבלת הכתובת
----------------------
-בראש מסך ה-Worker תראה כתובת כמו:
+--------------------
+בראש מסך ה-Worker תראה כתובת בסגנון:
 https://forma-coach-worker.<שם-החשבון-שלך>.workers.dev
 
-שלח לי את הכתובת הזו (היא לא סודית — זו רק נקודת הכניסה הציבורית).
-אני אכניס אותה ל-js/ai-config.js ואעלה גרסה מעודכנת ל-GitHub Pages —
-מהרגע הזה, המאמן ב-FORMA באמת מדבר עם Claude.
+שלח לי רק את הכתובת הזו. היא לא סודית — זו נקודת הכניסה הציבורית, והיא
+מוגנת ב-ALLOWED_ORIGIN כך שרק האפליקציה שלך יכולה לקרוא לה.
 
-מה אם משהו נכשל?
-------------------
-- אם אין רשת/אין תגובה מה-Worker: FORMA חוזרת אוטומטית למנוע המקומי
-  שכבר עובד (אותן תשובות מבוססות-נתונים כמו עכשיו) — הצ'אט לא נתקע.
-- לבדוק שה-Worker באמת עובד: פתח בדפדפן כלי כמו Postman או הרץ ב-Console:
-  fetch('<כתובת ה-Worker>', {method:'POST', headers:{'Content-Type':'application/json'},
-  body: JSON.stringify({userMessage:'מה לעשות היום?', contextText:'בדיקה'})}).then(r=>r.json()).then(console.log)
+אני אכניס אותה ל-js/ai-config.js ואעלה גרסה מעודכנת —
+ומהרגע הזה המאמן ב-FORMA באמת חושב, במקום לענות מתוך חוקים קבועים.
+
+
+בדיקה שזה עובד
+---------------
+פתח את הכתובת של ה-Worker בדפדפן — אמור לחזור:
+  {"error":"method_not_allowed"}
+זה תקין. זה אומר שה-Worker חי (הוא מקבל רק POST).
+
+לבדיקה מלאה, פתח את https://eliav38-sys.github.io/forma-coach/ ,
+לחץ F12 → Console, והדבק:
+
+fetch('<כתובת ה-Worker>', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ userMessage: 'מה לעשות היום?', contextText: 'בדיקה' })
+}).then(r => r.json()).then(console.log)
+
+אמור לחזור אובייקט עם direct_answer בעברית.
+
+
+אם משהו נכשל
+-------------
+- {"error":"origin_not_allowed"} — ALLOWED_ORIGIN לא תואם בדיוק. חייב להיות
+  https://eliav38-sys.github.io בלי סלאש בסוף ובלי /forma-coach.
+- {"error":"missing_api_key"} — המשתנה GEMINI_API_KEY לא נשמר, או שלא לחצת
+  Deploy אחרי ההוספה.
+- {"error":"gemini_error","status":429} — נגמרה המכסה היומית של ה-Free tier.
+  מתאפס למחרת.
+- {"error":"gemini_error","status":400} — בדרך כלל שם מודל לא תקין. ראה MODEL
+  בראש coach-worker.js; אפשר להחליף ל-gemini-3.5-flash או gemini-2.5-flash.
+- אין רשת / ה-Worker לא עונה — FORMA חוזרת אוטומטית למנוע המקומי שכבר עובד.
+  הצ'אט אף פעם לא נתקע ואף פעם לא שותק.

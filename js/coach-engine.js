@@ -3,7 +3,7 @@
    deterministic, data-grounded reasoning engine — every sentence is built
    from real local data through the domain modules, never invented.
    Layer 2 (`askSmart`, when FORMA_AI_WORKER_URL is configured and online):
-   calls real Claude via the Cloudflare Worker in /cloudflare-worker, handing
+   calls a real model (Gemini) via the Cloudflare Worker in /cloudflare-worker, handing
    it the SAME pre-computed real facts (via buildCoachContextText) so it can
    only reason and phrase — it never computes or invents a number itself.
    Any network/offline/server failure transparently falls back to `ask()`,
@@ -53,7 +53,7 @@ const FORMA_COACH = (() => {
     return { profile, sessions, setLogs, measurements, cardio, recovery, days };
   }
 
-  /** A bounded, real-data-only Hebrew brief handed to the live model — Claude
+  /** A bounded, real-data-only Hebrew brief handed to the live model — it
       reasons and phrases over these facts, it never computes or invents them. */
   function buildCoachContextText(ctx) {
     const lines = [];
@@ -101,7 +101,7 @@ const FORMA_COACH = (() => {
     return lines.join('\n');
   }
 
-  /** Calls the real Claude connection when configured; throws on any failure
+  /** Calls the live model connection when configured; throws on any failure
       so the caller can fall back to the local reasoning engine. */
   async function askLive(userMessage, ctx) {
     if (!FORMA_AI_WORKER_URL) throw new Error('no_worker_configured');

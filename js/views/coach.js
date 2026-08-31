@@ -105,7 +105,7 @@ FORMA_VIEWS.coachChat = {
       } else {
         el.className = 'msg msg--coach';
         el.innerHTML = `
-          ${m.source === 'live' ? `<span class="live-badge">${ICONS.bolt} Claude</span>` : ''}
+          ${m.source === 'live' ? `<span class="live-badge">${ICONS.bolt} Gemini</span>` : ''}
           <p>${esc(m.content)}</p>
           ${m.referencedData?.length ? `<p class="reason">${m.referencedData.map(esc).join(' · ')}</p>` : ''}
           ${m.safety?.message && m.safety.message !== m.content ? `<p class="reason" style="color:var(--status-low-ink)">${esc(m.safety.message)}</p>` : ''}
@@ -129,7 +129,7 @@ function confidenceHe(c) { return { low: 'נמוכה', medium: 'בינונית',
 function runCoachAction(action) {
   action = action || {};
   action.parameters = action.parameters || {};
-  // Live (Claude-generated) actions carry a type/label but no internal IDs —
+  // Live (model-generated) actions carry a type/label but no internal IDs —
   // resolve today's actual scheduled day rather than trust a guessed one.
   if (!action.parameters.dayId && ['reduce_volume', 'reduce_load', 'keep', 'import_day'].includes(action.type)) {
     const today = todaysActivity();
