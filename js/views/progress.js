@@ -72,7 +72,7 @@ FORMA_VIEWS.progress = {
 
         <div class="card mt-4">
           <p class="h3">נפח שבועי ישיר — מתוכנן</p>
-          <p class="body-sm mt-1 muted">כפי שהוגדר בתוכנית, לא נגזר.</p>
+          <p class="body-sm mt-1 muted">מחושב מסכום הסטים בתוכנית הנוכחית.</p>
           <div class="muscle-target-grid mt-3">
             ${Object.values(FORMA_DB.getMuscleWeeklyTargets()).map(t => `
               <div class="muscle-target-cell">

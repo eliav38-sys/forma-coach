@@ -84,7 +84,7 @@ FORMA_VIEWS.workoutLive = {
         </div>
 
         ${renderVideoFrame(ex.videoYoutubeId, ex.nameHe)}
-        ${ex.cues?.[0] ? `<p class="body-sm text-center mt-2 muted">${esc(ex.cues[0])}</p>` : ''}
+        ${(ex.cues?.[0] || day?.dayCue) ? `<p class="body-sm text-center mt-2 muted">${esc(ex.cues?.[0] || day.dayCue)}</p>` : ''}
 
         <div class="prev-perf">${prevSameIndex ? `לפני: <b class="ltr-num">${prevSameIndex.weight}</b> ק"ג × <b class="ltr-num">${prevSameIndex.reps}</b> (RPE <span class="ltr-num">${prevSameIndex.rpe}</span>)` : 'אין עדיין היסטוריה בתרגיל הזה'}</div>
 
@@ -230,7 +230,7 @@ FORMA_VIEWS.workoutLive = {
 
     function startRest(seconds, ex) {
       let remaining = seconds;
-      const cue = ex.cues && ex.cues.length ? ex.cues[Math.floor(Math.random() * ex.cues.length)] : '';
+      const cue = (ex.cues && ex.cues.length ? ex.cues[Math.floor(Math.random() * ex.cues.length)] : null) || day?.dayCue || '';
       const overlay = document.createElement('div');
       overlay.className = 'rest-overlay';
       overlay.innerHTML = `

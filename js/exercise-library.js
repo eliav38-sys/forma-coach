@@ -175,6 +175,26 @@ const FORMA_EXERCISES = [
     primary: 'triceps', secondary: [], feel: '',
     cues: ['המרפקים נשארים קבועים והפתיחה מתבצעת בשליטה.'], mistakes: [],
     tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: 'i14hrj7l7CI'
+  },
+
+  // ---- Added for the revised A/B/C split (chest+delts+tri / back+bi+rear-delt / legs+shoulders) ---
+  {
+    id: 'chest-press-machine', nameHe: 'לחיצת חזה במכונה', nameEn: 'Chest Press',
+    primary: 'chest', secondary: ['front-delts', 'triceps'], feel: '',
+    cues: [], mistakes: [],
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: 'pLofEAcfsO8'
+  },
+  {
+    id: 'one-arm-machine-row', nameHe: 'חתירה במכשיר ביד אחת', nameEn: 'One Arm Machine Row',
+    primary: 'mid-back', secondary: ['lats', 'biceps'], feel: '',
+    cues: [], mistakes: [],
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: 'z11jNvj5hH0'
+  },
+  {
+    id: 'dumbbell-curl', nameHe: 'כפיפת מרפקים עם דאמבלים', nameEn: 'Dumbbell Curl',
+    primary: 'biceps', secondary: ['forearms'], feel: '',
+    cues: [], mistakes: [],
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: '6DeLZ6cbgWQ'
   }
 ];
 

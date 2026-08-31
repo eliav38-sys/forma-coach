@@ -62,7 +62,9 @@ const FORMA_DB = (() => {
   function emit(evt, payload) { (listeners[evt] || []).forEach(cb => { try { cb(payload); } catch (e) { console.error(e); } }); }
 
   // ---- seed / init -------------------------------------------------------
-  const SCHEMA_VERSION = 2; // v2: full 3-day program, RPE (not RIR), weekly schedule, 6-week block.
+  // v2: full 3-day program, RPE (not RIR), weekly schedule, 6-week block.
+  // v3: revised A/B/C split (chest+delts+tri / back+bi+rear-delt / legs+shoulders).
+  const SCHEMA_VERSION = 3;
   function isSeeded() { return !!readRaw(KEYS.meta, {}).seededAt; }
 
   function seedIfNeeded() {
@@ -71,7 +73,7 @@ const FORMA_DB = (() => {
       return;
     }
     const meta = readRaw(KEYS.meta, {});
-    if ((meta.version || 1) < SCHEMA_VERSION) migrateToV2();
+    if ((meta.version || 1) < SCHEMA_VERSION) migrateProgram();
   }
 
   function seedFresh() {
@@ -109,8 +111,10 @@ const FORMA_DB = (() => {
 
   /** Replaces the program (workout days/plan/schedule) with the current full
       program, without touching the user's own history — sessions, set logs,
-      measurements, recovery logs, cardio and photos all stay exactly as they were. */
-  function migrateToV2() {
+      measurements, recovery logs, cardio and photos all stay exactly as they
+      were. Runs every time the stored schema version is behind the app's —
+      each program revision (new exercises, split, cues) lands this way. */
+  function migrateProgram() {
     writeRaw(KEYS.workoutPlan, FORMA_SEED.workoutPlan);
     writeRaw(KEYS.workoutDays, FORMA_SEED.workoutDays);
     const settings = readRaw(KEYS.settings, {});

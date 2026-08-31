@@ -144,6 +144,7 @@ FORMA_VIEWS.trainingDay = {
       <div class="view">
         ${topbar(day.name, { back: true })}
         ${day.exerciseIds.length ? `<p class="body-sm">${esc(day.focus || '')}</p>` : ''}
+        ${day.dayCue ? `<div class="card card--accent mt-3"><p class="body-sm">${ICONS.bolt}${esc(day.dayCue)}</p></div>` : ''}
 
         <div class="stack mt-4" id="ex-list">
           ${day.exerciseIds.map((id, i) => exerciseRow(day.id, id, i)).join('') || `<div class="empty-state">${ICONS.empty}<p>עוד לא נוספו תרגילים ליום הזה.</p></div>`}
@@ -269,7 +270,7 @@ FORMA_VIEWS.exerciseDetail = {
         <div class="card mt-4">
           <p class="eyebrow">מופיע בתוכנית</p>
           <div class="stack stack--sm mt-2">
-            ${appearances.map(a => `<div class="row row--between"><span class="body-lg">${esc(a.day.name)}</span><span class="body-sm ltr-num">${a.prescription.sets}×${a.prescription.repLow}–${a.prescription.repHigh} · RPE ${a.prescription.rpeLow === a.prescription.rpeHigh ? a.prescription.rpeHigh : a.prescription.rpeLow + '–' + a.prescription.rpeHigh}</span></div>`).join('') || '<p class="body-sm">תרגיל שנוסף ידנית.</p>'}
+            ${appearances.map(a => `<div class="row row--between"><span class="body-lg">${esc(a.day.name)}</span><span class="body-sm ltr-num">${a.prescription.sets}×${a.prescription.repLow}–${a.prescription.repHigh} · RPE ${a.prescription.rpeLow === a.prescription.rpeHigh ? a.prescription.rpeHigh : a.prescription.rpeLow + '–' + a.prescription.rpeHigh}</span></div>`).join('') || '<p class="body-sm">לא חלק מהתוכנית הפעילה כרגע — נשאר כאן בשביל ההיסטוריה שלך.</p>'}
           </div>
         </div>
 

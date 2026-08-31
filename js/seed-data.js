@@ -53,50 +53,47 @@ const FORMA_SEED = {
 
   workoutDays: [
     {
-      id: 'day-a', order: 1, name: 'אימון A — Upper 1',
-      focus: 'חזה עליון, גב, כתפיים וידיים — איכות סטים, לא נפח מיותר',
-      status: 'verified', expectedDurationMin: 75,
+      id: 'day-a', order: 1, name: 'אימון A — חזה, כתפיים וטרייספס',
+      focus: 'חזה עליון, כתף צדית וטרייספס',
+      dayCue: 'שליטה בתנועה, טווח מלא, ועלייה הדרגתית במשקל.',
+      status: 'verified', expectedDurationMin: 60,
       exercises: [
-        { exerciseId: 'incline-dumbbell-press', sets: 3, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 180 },
-        { exerciseId: 'chest-supported-row', sets: 3, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
-        { exerciseId: 'lat-pulldown', sets: 3, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 90, restSecHigh: 120 },
-        { exerciseId: 'lateral-raises', sets: 3, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'pec-deck-fly', sets: 2, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'preacher-curl', sets: 3, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'overhead-cable-triceps-extension', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'rear-delt-fly', sets: 2, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 }
+        { exerciseId: 'incline-dumbbell-press', sets: 4, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
+        { exerciseId: 'chest-press-machine', sets: 3, repLow: 8, repHigh: 12, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
+        { exerciseId: 'pec-deck-fly', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'lateral-raises', sets: 4, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'triceps-pushdown', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'overhead-cable-triceps-extension', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 }
       ]
     },
     {
-      id: 'day-b', order: 2, name: 'אימון B — Lower + Shoulders',
-      focus: 'רגליים מלאות וכתפיים, עם תוספת קטנה לגב לשימור תדירות',
-      status: 'verified', expectedDurationMin: 80,
+      id: 'day-b', order: 2, name: 'אימון B — גב, בייספס וכתף אחורית',
+      focus: 'רוחב גב, בייספס וכתף אחורית',
+      dayCue: 'חזה פתוח, משיכה מהגב, ושליטה מלאה בחזרה.',
+      status: 'verified', expectedDurationMin: 65,
+      exercises: [
+        { exerciseId: 'lat-pulldown', sets: 4, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
+        { exerciseId: 'seated-cable-row', sets: 3, repLow: 8, repHigh: 12, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
+        { exerciseId: 'one-arm-machine-row', sets: 3, repLow: 8, repHigh: 12, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
+        { exerciseId: 'straight-arm-pulldown', sets: 3, repLow: 12, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'rear-delt-fly', sets: 4, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'dumbbell-curl', sets: 3, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'hammer-curl', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 }
+      ]
+    },
+    {
+      id: 'day-c', order: 3, name: 'אימון C — רגליים וכתפיים',
+      focus: 'רגליים, כתפיים ויציבות',
+      dayCue: 'טכניקת יציבה, טווח מלא ושליטה בירידה.',
+      status: 'verified', expectedDurationMin: 70,
       exercises: [
         { exerciseId: 'leg-press-squat', sets: 4, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 180 },
-        { exerciseId: 'romanian-deadlift', sets: 3, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 180 },
+        { exerciseId: 'romanian-deadlift', sets: 3, repLow: 8, repHigh: 12, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 180 },
         { exerciseId: 'leg-curl', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
         { exerciseId: 'leg-extension', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'calf-raise', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'shoulder-press', sets: 3, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 120, restSecHigh: 120 },
-        { exerciseId: 'lateral-raises', sets: 3, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'straight-arm-pulldown', sets: 2, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'decline-reverse-crunch', sets: 2, repLow: 8, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 60 }
-      ]
-    },
-    {
-      id: 'day-c', order: 3, name: 'אימון C — Upper 2',
-      focus: 'חשיפה שנייה ואיכותית לחזה, גב, כתפיים וידיים — יותר היפרטרופיה, פחות עומס מפרקי',
-      status: 'verified', expectedDurationMin: 75,
-      exercises: [
-        { exerciseId: 'incline-chest-press', sets: 3, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 120, restSecHigh: 120 },
-        { exerciseId: 'seated-cable-row', sets: 3, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 90, restSecHigh: 120 },
-        { exerciseId: 'flat-dumbbell-press', sets: 2, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 120, restSecHigh: 120 },
-        { exerciseId: 'lat-pulldown', sets: 2, repLow: 8, repHigh: 12, rpeLow: 8, rpeHigh: 8, restSecLow: 90, restSecHigh: 120 },
-        { exerciseId: 'lateral-raises', sets: 3, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 9, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'rear-delt-fly', sets: 2, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'cable-biceps-curl', sets: 2, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'hammer-curl', sets: 2, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
-        { exerciseId: 'triceps-pushdown', sets: 3, repLow: 10, repHigh: 15, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 }
+        { exerciseId: 'calf-raise', sets: 3, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'shoulder-press', sets: 3, repLow: 6, repHigh: 10, rpeLow: 7.5, rpeHigh: 8.5, restSecLow: 60, restSecHigh: 90 },
+        { exerciseId: 'lateral-raises', sets: 4, repLow: 12, repHigh: 20, rpeLow: 8, rpeHigh: 8, restSecLow: 60, restSecHigh: 90 }
       ]
     }
   ].map(d => ({ ...d, exerciseIds: d.exercises.map(e => e.exerciseId) })),
@@ -112,18 +109,19 @@ const FORMA_SEED = {
     }
   },
 
-  // Section: נפח שבועי ישיר מתוכנן — given as its own authoritative summary,
-  // not re-derived from the exercise list, so it stays exactly as provided.
+  // Section: נפח שבועי ישיר מתוכנן — this revision of the program didn't come
+  // with its own declared table, so these are computed by summing primary-
+  // muscle sets straight from workoutDays above (see progress.js caption).
   muscleWeeklyTargets: {
     chest: { targetSets: 10, muscles: ['chest'], labelHe: 'חזה' },
     back: { targetSets: 13, muscles: ['lats', 'mid-back'], labelHe: 'גב' },
-    shoulders: { targetSets: 13, muscles: ['front-delts', 'side-delts', 'rear-delts'], labelHe: 'כתפיים' },
-    biceps: { targetSets: 7, muscles: ['biceps'], labelHe: 'בייספס' },
+    shoulders: { targetSets: 15, muscles: ['front-delts', 'side-delts', 'rear-delts'], labelHe: 'כתפיים' },
+    biceps: { targetSets: 6, muscles: ['biceps'], labelHe: 'בייספס' },
     triceps: { targetSets: 6, muscles: ['triceps'], labelHe: 'טרייספס' },
     quads: { targetSets: 7, muscles: ['quads'], labelHe: 'קוואדס' },
     hamstrings: { targetSets: 6, muscles: ['hamstrings'], labelHe: 'המסטרינג' },
     calves: { targetSets: 3, muscles: ['calves'], labelHe: 'תאומים' },
-    core: { targetSets: 2, muscles: ['core'], labelHe: 'ליבה' }
+    core: { targetSets: 0, muscles: ['core'], labelHe: 'ליבה (רק בעקיפין דרך רגליים)' }
   }
 };
 

@@ -12,7 +12,8 @@ const EXERCISE_INCREMENTS_KG = {
   'leg-press-squat': 5, 'romanian-deadlift': 2.5, 'leg-curl': 2.5, 'leg-extension': 2.5, 'calf-raise': 5,
   'shoulder-press': 2, 'straight-arm-pulldown': 2.5, 'decline-reverse-crunch': 0,
   'incline-chest-press': 2.5, 'seated-cable-row': 2.5, 'flat-dumbbell-press': 2,
-  'cable-biceps-curl': 1, 'hammer-curl': 1, 'triceps-pushdown': 1
+  'cable-biceps-curl': 1, 'hammer-curl': 1, 'triceps-pushdown': 1,
+  'chest-press-machine': 2.5, 'one-arm-machine-row': 2.5, 'dumbbell-curl': 1
 };
 
 function suggestedIncrementKg(exerciseId, currentWeight) {
