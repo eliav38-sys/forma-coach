@@ -103,6 +103,8 @@ const FORMA_APP = (() => {
   function init() {
     FORMA_DB.seedIfNeeded();
     applyTheme();
+    // Ask the browser to keep local data before anything else touches it.
+    FORMA_STORAGE.init();
     FORMA_ROUTER.add('/onboarding', FORMA_VIEWS.onboarding);
     FORMA_ROUTER.add('/today', FORMA_VIEWS.today);
     FORMA_ROUTER.add('/training', FORMA_VIEWS.training);

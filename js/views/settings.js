@@ -48,6 +48,11 @@ FORMA_VIEWS.settings = {
           `}
         </div>
 
+        <p class="eyebrow mt-6">שמירת הנתונים</p>
+        <div class="card mt-2" id="storage-card">
+          <p class="body-sm muted">בודק…</p>
+        </div>
+
         <p class="eyebrow mt-6">תוכנית</p>
         <button class="option mt-2" id="schedule-link" style="width:100%">
           <div class="flex-1" style="text-align:start">
@@ -91,6 +96,7 @@ FORMA_VIEWS.settings = {
     wireTopbarBack(container, '/today');
     container.querySelector('#schedule-link').addEventListener('click', () => FORMA_ROUTER.navigate('/training/schedule'));
     wireGeminiSettings(container);
+    paintStorageCard(container);
 
     container.querySelectorAll('[data-theme]').forEach(btn => btn.addEventListener('click', () => {
       FORMA_DB.saveSettings({ theme: btn.dataset.theme });
@@ -122,6 +128,27 @@ FORMA_VIEWS.settings = {
     });
   }
 };
+
+/* Reports honestly on whether local data will survive, and says what to do
+   when it won't — losing logged training silently would be the worst possible
+   failure mode for this app. */
+async function paintStorageCard(container) {
+  const card = container.querySelector('#storage-card');
+  if (!card) return;
+  const [st, use] = await Promise.all([FORMA_STORAGE.status(), FORMA_STORAGE.usage()]);
+  if (!card.isConnected) return;
+
+  card.innerHTML = `
+    <div class="row row--between">
+      <p class="h3">${esc(st.titleHe)}</p>
+      ${statusChip(st.tone, st.tone === 'good' ? 'מוגן' : st.tone === 'mid' ? 'שים לב' : 'בסיכון')}
+    </div>
+    <p class="body-sm mt-2">${esc(st.detailHe)}</p>
+    ${st.actionHe ? `<p class="body-sm mt-2" style="color:var(--accent);font-weight:700">${esc(st.actionHe)}</p>` : ''}
+    ${use ? `<p class="body-sm mt-2 muted ltr-num">בשימוש: ${use.usedMb} MB</p>` : ''}
+    <p class="body-sm mt-3 muted">בכל מקרה, ייצוא JSON למטה הוא הגיבוי היחיד ששורד גם אם המכשיר עצמו הולך לאיבוד.</p>
+  `;
+}
 
 /* The key is typed by the user, on their own device, and goes straight to
    localStorage. It is never sent anywhere except to Google's own API. */

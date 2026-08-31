@@ -1,10 +1,11 @@
 /* FORMA — service worker. App-shell cache-first so a workout can be started,
    logged, and a rest timer run with zero network (PRD 5.3, 15.1, 16.1). */
 
-const CACHE_NAME = 'forma-shell-v6';
+const CACHE_NAME = 'forma-shell-v7';
 const PRECACHE = [
   './', './index.html', './styles.css', './manifest.webmanifest',
-  './js/seed-data.js', './js/exercise-library.js', './js/icons.js', './js/db.js', './js/safety.js',
+  './js/seed-data.js', './js/exercise-library.js', './js/icons.js',
+  './js/storage-persistence.js', './js/db.js', './js/safety.js',
   './js/domain-recovery.js', './js/domain-progression.js', './js/domain-measurements.js', './js/domain-training-load.js',
   './js/domain-schedule.js', './js/domain-gamification.js',
   './js/nutrition-content.js', './js/domain-nutrition.js',
