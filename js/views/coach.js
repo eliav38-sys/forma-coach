@@ -247,19 +247,15 @@ function openZoneSheet(zoneKey, view) {
 }
 
 // ---------------------------------------------------------------------------
-FORMA_VIEWS.nutrition = {
+/* The nutrition dashboard itself now lives in views/nutrition.js. This screen
+   stays as the "what should I eat" idea list, separate from calorie tracking. */
+FORMA_VIEWS.nutritionIdeas = {
   render(params, container) {
-    const profile = FORMA_DB.getProfile();
-    const target = proteinTargetRange(profile.weightKg);
     container.innerHTML = `
       <div class="view">
-        ${topbar('תזונה', { back: true })}
-        <div class="card">
-          <p class="eyebrow">יעד חלבון יומי</p>
-          <p class="h3 mt-1">${esc(target.message)}</p>
-        </div>
-        <p class="h3 mt-5">אבני ארוחה</p>
-        <div class="stack mt-3">
+        ${topbar('רעיונות לארוחות', { back: true })}
+        <p class="body-sm">כל הרעיונות כאן צמחוניים ולא חריפים, לפי ההעדפות שלך.</p>
+        <div class="stack mt-4">
           ${NUTRITION_STONES.map(s => `
             <div class="card">
               <p class="h3">${esc(s.nameHe)}</p>
@@ -268,7 +264,7 @@ FORMA_VIEWS.nutrition = {
         </div>
       </div>
     `;
-    wireTopbarBack(container, '/coach');
+    wireTopbarBack(container, '/coach/nutrition');
   }
 };
 

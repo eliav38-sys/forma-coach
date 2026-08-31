@@ -5,9 +5,9 @@
 const WEEKDAY_NAMES_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 
 const ACTIVITY_TYPES = {
-  'strength-a': { kind: 'strength', dayId: 'day-a', labelHe: 'אימון A — Upper 1', shortHe: 'אימון A' },
-  'strength-b': { kind: 'strength', dayId: 'day-b', labelHe: 'אימון B — Lower + Shoulders', shortHe: 'אימון B' },
-  'strength-c': { kind: 'strength', dayId: 'day-c', labelHe: 'אימון C — Upper 2', shortHe: 'אימון C' },
+  'strength-a': { kind: 'strength', dayId: 'day-a', labelHe: 'אימון A — פלג גוף עליון 1', shortHe: 'אימון A' },
+  'strength-b': { kind: 'strength', dayId: 'day-b', labelHe: 'אימון B — רגליים + בטן', shortHe: 'אימון B' },
+  'strength-c': { kind: 'strength', dayId: 'day-c', labelHe: 'אימון C — פלג גוף עליון 2', shortHe: 'אימון C' },
   'run-easy': { kind: 'run-easy', labelHe: 'ריצה קלה', shortHe: 'ריצה קלה' },
   'run-quality': { kind: 'run-quality', labelHe: 'ריצת איכות מבוקרת', shortHe: 'ריצת איכות' },
   'recovery': { kind: 'recovery', labelHe: 'התאוששות — הליכה או מוביליטי', shortHe: 'התאוששות' },
@@ -37,15 +37,29 @@ function weekActivityList() {
   return WEEKDAY_NAMES_HE.map((name, i) => ({ dayIndex: i, nameHe: name, activity: scheduleForWeekday(i) }));
 }
 
-/** PRD-given 6-week periodization block. Repeats as a new cycle after week 6. */
+/** PRD-given 6-week periodization block. Repeats as a new cycle after week 6.
+    rpeLabel is the PRD's own wording; rirLabel is the same thing restated as
+    RIR (RIR = 10 − RPE) so the UI can speak the same language as the current
+    RIR-based program rather than mixing two scales on one screen. */
 const PROGRAM_BLOCK_WEEKS = [
-  { week: 1, rpeLabel: 'RPE 7–7.5', volumePct: 100, note: 'שבוע כיול' },
-  { week: 2, rpeLabel: 'RPE 7.5–8', volumePct: 100, note: 'בניית קצב' },
-  { week: 3, rpeLabel: 'RPE 8', volumePct: 100, note: 'התקדמות' },
-  { week: 4, rpeLabel: 'RPE 8–8.5', volumePct: 100, note: 'העלאת עומס' },
-  { week: 5, rpeLabel: 'RPE 8.5–9', volumePct: 100, note: 'שיא מבוקר' },
-  { week: 6, rpeLabel: 'RPE 6–7', volumePct: 55, note: 'Deload — כ-50%–60% מהנפח' }
+  { week: 1, rpeLabel: 'RPE 7–7.5', rirLabel: 'RIR 2.5–3', volumePct: 100, note: 'שבוע כיול' },
+  { week: 2, rpeLabel: 'RPE 7.5–8', rirLabel: 'RIR 2–2.5', volumePct: 100, note: 'בניית קצב' },
+  { week: 3, rpeLabel: 'RPE 8', rirLabel: 'RIR 2', volumePct: 100, note: 'התקדמות' },
+  { week: 4, rpeLabel: 'RPE 8–8.5', rirLabel: 'RIR 1.5–2', volumePct: 100, note: 'העלאת עומס' },
+  { week: 5, rpeLabel: 'RPE 8.5–9', rirLabel: 'RIR 1–1.5', volumePct: 100, note: 'שיא מבוקר' },
+  { week: 6, rpeLabel: 'RPE 6–7', rirLabel: 'RIR 3–4', volumePct: 55, note: 'Deload — כ-50%–60% מהנפח' }
 ];
+
+/** How the program itself states the target for one prescription: RIR when the
+    program declared it, otherwise the day's own guidance. Never invents a number. */
+function intensityLabel(prescription) {
+  if (!prescription) return null;
+  const { rirLow, rirHigh } = prescription;
+  if (rirLow == null || rirHigh == null) return 'שליטה מלאה';
+  if (rirLow === rirHigh) return `RIR ${rirLow}`;
+  if (rirLow === 0 && rirHigh === 1) return 'קרוב לכשל';
+  return `RIR ${rirLow}–${rirHigh}`;
+}
 
 function getBlockStartDate() {
   return FORMA_DB.getSettings().programBlockStartDate || FORMA_DB.getSettings().onboardingDate || new Date().toISOString().slice(0, 10);

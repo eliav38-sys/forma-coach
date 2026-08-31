@@ -195,6 +195,27 @@ const FORMA_EXERCISES = [
     primary: 'biceps', secondary: ['forearms'], feel: '',
     cues: [], mistakes: [],
     tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: '6DeLZ6cbgWQ'
+  },
+
+  // ---- Added for the Upper / Legs / Upper split ----------------------------
+  {
+    id: 'rope-hammer-curl', nameHe: 'האמר בכבל — פולי תחתון', nameEn: 'Rope Hammer Curl',
+    primary: 'biceps', secondary: ['forearms'], feel: '',
+    cues: ['אחיזה ניטרלית.'], mistakes: [],
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: 'VY4walmoM-I'
+  },
+  {
+    id: 'reverse-crunch', nameHe: 'רברס קראנץ׳', nameEn: 'Reverse Crunch',
+    primary: 'core', secondary: [], feel: '',
+    cues: ['גלגול אגן.'], mistakes: [],
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: 'ue6j6k0Vgbc'
+  },
+  {
+    id: 'side-plank', nameHe: 'פלאנק צדי', nameEn: 'Side Plank',
+    primary: 'core', secondary: [], feel: '',
+    cues: ['גוף ישר.'], mistakes: [],
+    tempo: '', breathing: '', rom: '', substitutes: [], videoYoutubeId: 'iNbH7_edNI8',
+    isHold: true
   }
 ];
 

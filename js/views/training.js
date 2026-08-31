@@ -180,12 +180,20 @@ FORMA_VIEWS.trainingDay = {
     container.innerHTML = `
       <div class="view">
         ${topbar(day.name, { back: true })}
-        ${day.exerciseIds.length ? `<p class="body-sm">${esc(day.focus || '')}</p>` : ''}
-        ${day.dayCue ? `<div class="card card--accent mt-3"><p class="body-sm">${ICONS.bolt}${esc(day.dayCue)}</p></div>` : ''}
+        ${day.subtitle ? `<p class="body-sm" style="color:var(--accent);font-weight:700">${esc(day.subtitle)}</p>` : ''}
+        ${day.goal ? `<p class="body-sm mt-1">מטרה: ${esc(day.goal)}</p>` : ''}
+        ${day.keyPoints?.length ? `<div class="card mt-3">
+          <p class="eyebrow">דגשים</p>
+          <div class="stack stack--sm mt-2">
+            ${day.keyPoints.map(p => `<p class="body-sm">${ICONS.check}${esc(p)}</p>`).join('')}
+          </div>
+        </div>` : ''}
 
-        <div class="stack mt-4" id="ex-list">
+        <div class="mt-4" id="ex-list">
           ${day.exerciseIds.map((id, i) => exerciseRow(day.id, id, i)).join('') || `<div class="empty-state">${ICONS.empty}<p>עוד לא נוספו תרגילים ליום הזה.</p></div>`}
         </div>
+
+        ${day.dayCue ? `<div class="card card--accent mt-4"><p class="eyebrow">הערת עבודה</p><p class="body-sm mt-1">${esc(day.dayCue)}</p></div>` : ''}
 
         <div class="stack mt-5">
           ${isEditable ? `
@@ -231,18 +239,41 @@ FORMA_VIEWS.trainingDay = {
   }
 };
 
+/** Volume as the program states it: reps for normal work, a hold in seconds
+    for isometrics like the side plank. Never renders "×undefined". */
+function prescriptionVolume(presc) {
+  if (!presc) return '';
+  if (presc.holdSecLow != null) {
+    const hold = presc.holdSecLow === presc.holdSecHigh ? `${presc.holdSecLow}` : `${presc.holdSecLow}–${presc.holdSecHigh}`;
+    return `<span class="ltr-num">${hold}</span> שנ׳${presc.perSide ? ' לכל צד' : ''}`;
+  }
+  const reps = presc.repLow === presc.repHigh ? `${presc.repHigh}` : `${presc.repLow}–${presc.repHigh}`;
+  return `<span class="ltr-num">${presc.sets}×${reps}</span>`;
+}
+
 function exerciseRow(dayId, id, i) {
   const ex = FORMA_DB.getExercise(id);
   const presc = FORMA_DB.getDayExercise(dayId, id);
   if (!ex) return '';
-  return `<button class="option" data-ex-open="${id}" aria-pressed="false">
-    <span class="mono" style="color:var(--ink-400);min-width:20px">${i + 1}</span>
-    <div class="flex-1">
-      <p class="body-lg" style="font-weight:700">${esc(ex.nameHe)}</p>
-      <p class="body-sm">${presc ? `<span class="ltr-num">${presc.sets}×${presc.repLow}–${presc.repHigh} · RPE ${presc.rpeLow === presc.rpeHigh ? presc.rpeHigh : presc.rpeLow + '–' + presc.rpeHigh}</span>` : ''} ${MUSCLES[ex.primary] ? '· ' + MUSCLES[ex.primary].he : ''}</p>
+  const intensity = intensityLabel(presc);
+  const lastWeight = lastWorkingWeight(id);
+  return `<div class="ex-row" data-ex-open="${id}">
+    <div class="ex-thumb">${ex.videoYoutubeId ? `<img src="https://i.ytimg.com/vi/${esc(ex.videoYoutubeId)}/default.jpg" alt="" loading="lazy" />` : ''}</div>
+    <div class="ex-body">
+      <p class="ex-name">${esc(ex.nameHe)}</p>
+      <p class="ex-meta">${prescriptionVolume(presc)}${intensity ? ` · ${esc(intensity)}` : ''}</p>
+      ${presc?.shortCue ? `<p class="ex-meta" style="color:var(--accent)">${esc(presc.shortCue)}</p>` : ''}
     </div>
+    ${lastWeight != null ? `<div class="ex-load"><div class="load-value ltr-num">${lastWeight}</div><div class="load-unit">ק״ג</div></div>` : ''}
     ${ICONS.chevronStart}
-  </button>`;
+  </div>`;
+}
+
+/** Heaviest-recent working weight actually logged for this exercise, or null. */
+function lastWorkingWeight(exerciseId) {
+  const hist = FORMA_DB.exerciseHistory(exerciseId);
+  for (const s of hist) if (s.weight != null && s.weight > 0) return s.weight;
+  return null;
 }
 
 function addCustomExercise(day, container) {
@@ -307,7 +338,7 @@ FORMA_VIEWS.exerciseDetail = {
         <div class="card mt-4">
           <p class="eyebrow">מופיע בתוכנית</p>
           <div class="stack stack--sm mt-2">
-            ${appearances.map(a => `<div class="row row--between"><span class="body-lg">${esc(a.day.name)}</span><span class="body-sm ltr-num">${a.prescription.sets}×${a.prescription.repLow}–${a.prescription.repHigh} · RPE ${a.prescription.rpeLow === a.prescription.rpeHigh ? a.prescription.rpeHigh : a.prescription.rpeLow + '–' + a.prescription.rpeHigh}</span></div>`).join('') || '<p class="body-sm">לא חלק מהתוכנית הפעילה כרגע — נשאר כאן בשביל ההיסטוריה שלך.</p>'}
+            ${appearances.map(a => `<div class="row row--between"><span class="body-lg">${esc(a.day.name)}</span><span class="body-sm">${prescriptionVolume(a.prescription)}${intensityLabel(a.prescription) ? ` · ${esc(intensityLabel(a.prescription))}` : ''}</span></div>`).join('') || '<p class="body-sm">לא חלק מהתוכנית הפעילה כרגע — נשאר כאן בשביל ההיסטוריה שלך.</p>'}
           </div>
         </div>
 

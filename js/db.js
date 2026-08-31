@@ -64,7 +64,8 @@ const FORMA_DB = (() => {
   // ---- seed / init -------------------------------------------------------
   // v2: full 3-day program, RPE (not RIR), weekly schedule, 6-week block.
   // v3: revised A/B/C split (chest+delts+tri / back+bi+rear-delt / legs+shoulders).
-  const SCHEMA_VERSION = 3;
+  // v4: Upper / Legs / Upper split, RIR-based intensity, core & hold work.
+  const SCHEMA_VERSION = 4;
   function isSeeded() { return !!readRaw(KEYS.meta, {}).seededAt; }
 
   function seedIfNeeded() {
@@ -91,7 +92,7 @@ const FORMA_DB = (() => {
     writeRaw(KEYS.goals, []);
     writeRaw(KEYS.bodyweight, []);
     writeRaw(KEYS.settings, {
-      theme: 'system', vibration: true, onboardingDone: false, quietMode: false,
+      theme: 'dark', vibration: true, onboardingDone: false, quietMode: false,
       weeklySchedule: FORMA_SEED.weeklySchedule, programBlockStartDate: nowIso().slice(0, 10)
     });
     writeRaw(KEYS.profile, {
@@ -230,6 +231,17 @@ const FORMA_DB = (() => {
   // ---- nutrition ----------------------------------------------------------
   const getMeals = () => getAll(KEYS.meals);
   const addMeal = (m) => addItem(KEYS.meals, m);
+  const updateMeal = (id, patch) => updateItem(KEYS.meals, id, patch);
+  function deleteMeal(id) {
+    writeRaw(KEYS.meals, getAll(KEYS.meals).filter(m => m.id !== id));
+  }
+  /** Upserts the meal for one slot on one date, so a day has at most one
+      "breakfast" row that accumulates items rather than many duplicates. */
+  function upsertMealSlot(dateIso, slot, items) {
+    const existing = getAll(KEYS.meals).find(m => (m.date || '').slice(0, 10) === dateIso && m.slot === slot);
+    if (existing) { updateMeal(existing.id, { items }); return existing.id; }
+    return addMeal({ date: dateIso, slot, items }).id;
+  }
 
   // ---- export / wipe ----------------------------------------------------
   function exportAll() {
@@ -262,7 +274,7 @@ const FORMA_DB = (() => {
     getBodyweightLogs, addBodyweightLog,
     getCoachMessages, addCoachMessage, getCoachDecisions, addCoachDecision, updateCoachDecision,
     addUserFeedback, getUserFeedback,
-    getMeals, addMeal,
+    getMeals, addMeal, updateMeal, deleteMeal, upsertMealSlot,
     exportAll, wipeAll, wipeCategory
   };
 })();

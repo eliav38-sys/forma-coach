@@ -85,6 +85,30 @@ function showInputModal({ title, label, placeholder = '', inputType = 'text', co
   });
 }
 
+/** Pick one option from a list. `options` is [{ value, title, subtitle }].
+    Resolves with the chosen `value`, or null if dismissed. */
+function showListModal({ title, options }) {
+  return new Promise((resolve) => {
+    const { backdrop, sheet, close } = openModalShell();
+    sheet.innerHTML = `
+      <p class="h2">${esc(title)}</p>
+      <div class="stack stack--sm mt-3">
+        ${options.map(o => `<button class="option" data-pick="${esc(o.value)}" style="width:100%">
+          <div class="flex-1" style="text-align:start">
+            <p class="body-lg" style="font-weight:700">${esc(o.title)}</p>
+            ${o.subtitle ? `<p class="body-sm muted">${esc(o.subtitle)}</p>` : ''}
+          </div>
+        </button>`).join('')}
+      </div>
+      <button class="btn btn--outline w-full mt-4" id="modal-cancel">ביטול</button>`;
+    let done = false;
+    const finish = (val) => { if (done) return; done = true; close(); resolve(val); };
+    sheet.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => finish(b.dataset.pick)));
+    sheet.querySelector('#modal-cancel').addEventListener('click', () => finish(null));
+    backdrop.addEventListener('click', () => finish(null));
+  });
+}
+
 function wireVideoFrames(container) {
   container.querySelectorAll('.video-frame[data-yt]').forEach(frame => {
     const play = () => {

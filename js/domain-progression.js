@@ -13,7 +13,8 @@ const EXERCISE_INCREMENTS_KG = {
   'shoulder-press': 2, 'straight-arm-pulldown': 2.5, 'decline-reverse-crunch': 0,
   'incline-chest-press': 2.5, 'seated-cable-row': 2.5, 'flat-dumbbell-press': 2,
   'cable-biceps-curl': 1, 'hammer-curl': 1, 'triceps-pushdown': 1,
-  'chest-press-machine': 2.5, 'one-arm-machine-row': 2.5, 'dumbbell-curl': 1
+  'chest-press-machine': 2.5, 'one-arm-machine-row': 2.5, 'dumbbell-curl': 1,
+  'rope-hammer-curl': 1, 'reverse-crunch': 0, 'side-plank': 0
 };
 
 function suggestedIncrementKg(exerciseId, currentWeight) {
@@ -60,6 +61,15 @@ function evaluateProgression(exerciseId, history, prescription) {
   if (!sessions.length || !prescription) {
     return { status: 'insufficient_data', message: 'עוד אין נתונים בתרגיל הזה כדי להציע שינוי משקל.' };
   }
+  // Holds (side plank) and core work carry no rep range and no declared RIR,
+  // so the double-progression rule simply doesn't apply — say so rather than
+  // computing a load recommendation from missing targets.
+  if (prescription.holdSecLow != null) {
+    return { status: 'not_applicable', message: 'תרגיל החזקה — ההתקדמות היא בזמן ההחזקה ובאיכות היציבה, לא במשקל.' };
+  }
+  if (prescription.rpeHigh == null) {
+    return { status: 'not_applicable', message: 'התוכנית מגדירה כאן שליטה מלאה ולא יעד RIR, ולכן אין המלצת העלאת משקל אוטומטית.' };
+  }
 
   const last = sessions[0];
   const currentWeight = last.find(s => !s.warmup)?.weight ?? null;
@@ -79,7 +89,7 @@ function evaluateProgression(exerciseId, history, prescription) {
       incrementKg: inc,
       fromWeight: currentWeight,
       toWeight: currentWeight != null ? Math.round((currentWeight + inc) * 10) / 10 : null,
-      message: `הגעת לחלק העליון של טווח החזרות ב-RPE ${prescription.rpeLow === prescription.rpeHigh ? prescription.rpeHigh : prescription.rpeLow + '–' + prescription.rpeHigh} היעד. אפשר להעלות כ-2.5%–5% (בערך ${inc} ק"ג) באימון הבא.`
+      message: `הגעת לחלק העליון של טווח החזרות בעצימות היעד (${intensityLabel(prescription)}). אפשר להעלות כ-2.5%–5% (בערך ${inc} ק"ג) באימון הבא.`
     };
   }
 
@@ -89,7 +99,7 @@ function evaluateProgression(exerciseId, history, prescription) {
     return {
       status: 'needs_review',
       message: overRpe
-        ? 'ה-RPE באימון האחרון היה גבוה מהיעד ביותר מנקודה. שומרים על אותו משקל, ואם זה חוזר — כדאי להוריד מעט.'
+        ? 'המאמץ באימון האחרון היה גבוה מהיעד ביותר מנקודה — כלומר פחות חזרות ברזרבה ממה שהתוכנית מבקשת. שומרים על אותו משקל, ואם זה חוזר — כדאי להוריד מעט.'
         : 'הביצועים ירדו מתחת לטווח החזרות. שומרים על אותו משקל בפעם הבאה במקום להוריד אוטומטית.'
     };
   }
@@ -108,7 +118,7 @@ function evaluatePlateau(exerciseId, history, recentRecoveryLogs, prescription) 
   const sameWeight = last[0]?.weight === prev[0]?.weight;
   if (sameWeight && avgReps(last) < avgReps(prev)) signals.push('ירידה בחזרות באותו משקל');
 
-  if (prescription) {
+  if (prescription && prescription.rpeHigh != null) {
     const lastHard = last.filter(s => !s.warmup && Number(s.rpe) >= prescription.rpeHigh).length / Math.max(1, last.length);
     const prevHard = prev.filter(s => !s.warmup && Number(s.rpe) >= prescription.rpeHigh).length / Math.max(1, prev.length);
     if (lastHard > prevHard + 0.2) signals.push('RPE גבוה יותר מהרגיל');

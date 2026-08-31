@@ -5,7 +5,8 @@ const FORMA_APP = (() => {
     { id: 'today', path: '/today', label: 'היום', icon: 'today' },
     { id: 'training', path: '/training', label: 'אימון', icon: 'training' },
     { id: 'progress', path: '/progress', label: 'התקדמות', icon: 'progress' },
-    { id: 'coach', path: '/coach', label: 'Coach', icon: 'coach' }
+    { id: 'coach', path: '/coach', label: 'Coach', icon: 'coach' },
+    { id: 'profile', path: '/profile', label: 'פרופיל', icon: 'trophy' }
   ];
 
   function renderNav(activePath) {
@@ -119,7 +120,10 @@ const FORMA_APP = (() => {
     FORMA_ROUTER.add('/coach/goals', FORMA_VIEWS.goals);
     FORMA_ROUTER.add('/coach/body-atlas', FORMA_VIEWS.bodyAtlas);
     FORMA_ROUTER.add('/coach/nutrition', FORMA_VIEWS.nutrition);
+    FORMA_ROUTER.add('/coach/nutrition/add', FORMA_VIEWS.nutritionAdd);
+    FORMA_ROUTER.add('/coach/nutrition/ideas', FORMA_VIEWS.nutritionIdeas);
     FORMA_ROUTER.add('/coach/nutrition/log', FORMA_VIEWS.nutritionLog);
+    FORMA_ROUTER.add('/profile', FORMA_VIEWS.profile);
     FORMA_ROUTER.add('/settings', FORMA_VIEWS.settings);
     FORMA_ROUTER.add('/recovery-check', FORMA_VIEWS.recoveryCheck);
 

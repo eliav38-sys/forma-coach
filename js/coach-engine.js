@@ -91,7 +91,10 @@ const FORMA_COACH = (() => {
         const ex = FORMA_DB.getExercise(presc.exerciseId);
         const history = FORMA_DB.exerciseHistory(presc.exerciseId);
         const prog = evaluateProgression(presc.exerciseId, history, presc);
-        lines.push(`- ${ex?.nameHe} (${ex?.nameEn}): ${presc.sets}×${presc.repLow}–${presc.repHigh} RPE ${presc.rpeLow}–${presc.rpeHigh}. ${prog.message}`);
+        const volume = presc.holdSecLow != null
+          ? `${presc.sets}× החזקה ${presc.holdSecLow}–${presc.holdSecHigh} שנ׳${presc.perSide ? ' לכל צד' : ''}`
+          : `${presc.sets}×${presc.repLow}–${presc.repHigh}`;
+        lines.push(`- ${ex?.nameHe} (${ex?.nameEn}): ${volume} ${intensityLabel(presc) || ''}. ${prog.message}`);
       });
     }
 

@@ -58,10 +58,21 @@ FORMA_VIEWS.workoutLive = {
       const history = FORMA_DB.exerciseHistory(current.id, session.id);
       const prevSameIndex = history[completedForEx.length] || history[0] || null;
 
+      const isHold = current.presc.holdSecLow != null;
+      const hasRpeTarget = current.presc.rpeLow != null && current.presc.rpeHigh != null;
+
       const defaultWeight = prevSameIndex ? prevSameIndex.weight : '';
-      const defaultReps = prevSameIndex ? prevSameIndex.reps : Math.round((current.presc.repLow + current.presc.repHigh) / 2);
-      const defaultRpe = Math.round(((current.presc.rpeLow + current.presc.rpeHigh) / 2) * 2) / 2;
+      // For a hold, "reps" is the seconds held; seed it from the target range.
+      const defaultReps = prevSameIndex ? prevSameIndex.reps
+        : isHold ? current.presc.holdSecLow
+        : Math.round((current.presc.repLow + current.presc.repHigh) / 2);
+      const defaultRpe = hasRpeTarget
+        ? Math.round(((current.presc.rpeLow + current.presc.rpeHigh) / 2) * 2) / 2
+        : 8;
       const restLabel = formatRestRange(current.presc.restSecLow, current.presc.restSecHigh);
+      const targetLine = isHold
+        ? `יעד: <span class="ltr-num">${current.presc.holdSecLow}–${current.presc.holdSecHigh}</span> שניות${current.presc.perSide ? ' לכל צד' : ''}`
+        : `יעד: <span class="ltr-num">${current.presc.repLow}–${current.presc.repHigh}</span> חזרות${hasRpeTarget ? ` · ${esc(intensityLabel(current.presc))}` : ' · שליטה מלאה'}`;
 
       const root = document.getElementById('live-root');
       root.innerHTML = `
@@ -102,7 +113,7 @@ FORMA_VIEWS.workoutLive = {
             </div>
           </div>
           <div class="entry-box">
-            <label>חזרות</label>
+            <label>${isHold ? 'שניות' : 'חזרות'}</label>
             <div class="stepper stepper--sm">
               <button data-step="reps" data-dir="-1">−</button>
               <span class="val ltr-num" id="reps-val">${defaultReps}</span>
@@ -118,7 +129,7 @@ FORMA_VIEWS.workoutLive = {
             </div>
           </div>
         </div>
-        <p class="body-sm text-center mt-2 muted">יעד: <span class="ltr-num">${current.presc.repLow}–${current.presc.repHigh}</span> חזרות ב-RPE <span class="ltr-num">${current.presc.rpeLow === current.presc.rpeHigh ? current.presc.rpeHigh : current.presc.rpeLow + '–' + current.presc.rpeHigh}</span></p>
+        <p class="body-sm text-center mt-2 muted">${targetLine}</p>
 
         <button class="finish-set-btn" id="finish-set-btn">סיימתי סט</button>
 
