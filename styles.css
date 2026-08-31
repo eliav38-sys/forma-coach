@@ -374,7 +374,7 @@ svg{ width: 20px; height: 20px; flex-shrink: 0; }
 
 /* ---- Progress ring ---- */
 .ring{ position: relative; display: inline-flex; align-items: center; justify-content: center; }
-.ring svg{ transform: rotate(-90deg); }
+.ring svg{ width: 100%; height: 100%; transform: rotate(-90deg); }
 .ring .ring-track{ fill: none; stroke: var(--border-soft); }
 .ring .ring-fill{ fill: none; stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
 .ring .ring-label{ position: absolute; font-family: var(--font-num); font-weight: 700; }
@@ -457,6 +457,30 @@ textarea.input{ min-height: 90px; padding: var(--space-3) var(--space-4); resize
 .video-frame:hover .video-play-btn, .video-frame:active .video-play-btn{ transform: scale(1.08); }
 .video-frame--playing{ cursor: default; background: #000; }
 .video-frame--playing::after{ display: none; }
+
+/* ---- Day thumb card (photo-rich workout card) ---- */
+.day-thumb-card{
+  display: flex; align-items: center; gap: var(--space-4);
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg); padding: var(--space-3);
+  box-shadow: var(--shadow-1); cursor: pointer;
+}
+.day-thumb-card + .day-thumb-card{ margin-top: var(--space-3); }
+.day-thumb-card.next{ border-color: var(--accent); box-shadow: 0 0 0 1.5px var(--accent) inset; }
+.day-thumb-card.done{ opacity: .78; }
+.day-thumb-card .thumb{
+  width: 68px; height: 68px; border-radius: var(--radius-md); overflow: hidden;
+  flex: none; position: relative; background: var(--ink-900);
+}
+.day-thumb-card .thumb img{ width: 100%; height: 100%; object-fit: cover; display: block; }
+.day-thumb-card .thumb-fallback{ width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--ink-400); }
+.day-thumb-card .thumb-fallback svg{ width: 26px; height: 26px; }
+.day-thumb-badge{
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: #fff; background: color-mix(in srgb, var(--ink-900) 45%, transparent);
+}
+.day-thumb-badge svg{ width: 24px; height: 24px; }
+.day-thumb-body{ flex: 1; min-width: 0; }
 .prev-perf{
   margin-top: var(--space-4); display: flex; align-items: center; justify-content: center; gap: var(--space-2);
   color: var(--ink-500); font-size: 13.5px;
@@ -561,7 +585,7 @@ textarea.input{ min-height: 90px; padding: var(--space-3) var(--space-4); resize
 
 /* ---- Body atlas ---- */
 .atlas-figure{ display: flex; justify-content: center; gap: var(--space-4); }
-.atlas-figure svg{ width: 100%; max-width: 300px; }
+.atlas-figure svg{ width: 100%; max-width: 300px; height: auto; aspect-ratio: 1 / 1; }
 .muscle-zone{ cursor: pointer; transition: opacity .15s ease; }
 .muscle-zone:hover, .muscle-zone:focus{ opacity: .8; }
 .atlas-sheet{

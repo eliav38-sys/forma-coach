@@ -14,6 +14,15 @@ FORMA_VIEWS.settings = {
           <p class="body-sm mt-2">${FORMA_AI_WORKER_URL ? `${statusChip('good', 'Coach מחובר ל-Claude')} כשיש רשת. שאלה חופשית בצ׳אט נשלחת יחד עם תקציר נתונים לצורך התשובה בלבד.` : `${statusChip('neutral', 'Coach במצב מקומי')} עדיין לא חובר מודל חי — התשובות מבוססות-נתונים אמיתיים, רק בלי ניסוח חופשי של Claude.`}</p>
         </div>
 
+        <p class="eyebrow mt-6">תוכנית</p>
+        <button class="option mt-2" id="schedule-link" style="width:100%">
+          <div class="flex-1" style="text-align:start">
+            <p class="body-lg" style="font-weight:700">לוח ימי אימונים</p>
+            <p class="body-sm mt-1 muted">בחר לאיזה יום בשבוע משויך כל אימון — תוכן האימונים לא משתנה</p>
+          </div>
+          ${ICONS.chevronStart}
+        </button>
+
         <p class="eyebrow mt-6">תצוגה</p>
         <div class="chip-row mt-2">
           <button class="chip" data-theme="system" aria-pressed="${(!settings.theme || settings.theme === 'system') ? 'true' : 'false'}">אוטומטי</button>
@@ -46,6 +55,7 @@ FORMA_VIEWS.settings = {
       </div>
     `;
     wireTopbarBack(container, '/today');
+    container.querySelector('#schedule-link').addEventListener('click', () => FORMA_ROUTER.navigate('/training/schedule'));
 
     container.querySelectorAll('[data-theme]').forEach(btn => btn.addEventListener('click', () => {
       FORMA_DB.saveSettings({ theme: btn.dataset.theme });

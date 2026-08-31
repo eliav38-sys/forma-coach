@@ -9,6 +9,7 @@ FORMA_VIEWS.training = {
     const completedThisWeek = new Set(sessions.filter(s => s.status === 'completed' && s.endedAt >= sinceIso).map(s => s.dayId));
     const todayIdx = new Date().getDay();
     const block = currentBlockWeek();
+    const nextDayId = findNextStrengthDayId(todayIdx, completedThisWeek);
 
     container.innerHTML = `
       <div class="view">
@@ -27,7 +28,7 @@ FORMA_VIEWS.training = {
         </div>
 
         <div class="stack mt-5">
-          ${days.map(d => dayCard(d, completedThisWeek.has(d.id))).join('')}
+          ${days.map(d => dayCard(d, completedThisWeek.has(d.id), d.id === nextDayId)).join('')}
         </div>
 
         <div class="card mt-4">
@@ -66,16 +67,44 @@ FORMA_VIEWS.training = {
 };
 
 function blockIndicator(block) {
+  const pct = currentBlockProgressPct();
   return `<div class="card card--accent mt-4 block-indicator">
-    <div class="row row--between">
-      <p class="eyebrow" style="color:var(--accent)">בלוק התקדמות — שבוע ${block.week} מתוך 6</p>
-      <span class="mono ltr-num" style="font-weight:700;color:var(--accent)">${esc(block.rpeLabel)}</span>
+    <div class="row" style="align-items:flex-start">
+      ${blockRing(pct)}
+      <div class="flex-1">
+        <div class="row row--between">
+          <p class="eyebrow" style="color:var(--accent)">בלוק התקדמות — שבוע ${block.week} מתוך 6</p>
+          <span class="mono ltr-num" style="font-weight:700;color:var(--accent)">${esc(block.rpeLabel)}</span>
+        </div>
+        <div class="block-track mt-3">
+          ${PROGRAM_BLOCK_WEEKS.map(w => `<span class="block-seg ${w.week === block.week ? 'active' : ''} ${w.volumePct < 100 ? 'deload' : ''}"></span>`).join('')}
+        </div>
+        <p class="body-sm mt-2">${esc(block.note)}${block.volumePct < 100 ? ` · ${block.volumePct}% מהנפח` : ''}</p>
+      </div>
     </div>
-    <div class="block-track mt-3">
-      ${PROGRAM_BLOCK_WEEKS.map(w => `<span class="block-seg ${w.week === block.week ? 'active' : ''} ${w.volumePct < 100 ? 'deload' : ''}"></span>`).join('')}
-    </div>
-    <p class="body-sm mt-2">${esc(block.note)}${block.volumePct < 100 ? ` · ${block.volumePct}% מהנפח` : ''}</p>
   </div>`;
+}
+
+function blockRing(pct) {
+  const size = 60, stroke = 6, r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  return `<div class="ring" style="width:${size}px;height:${size}px;flex:none">
+    <svg viewBox="0 0 ${size} ${size}">
+      <circle class="ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"/>
+      <circle class="ring-fill" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}"
+        stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - pct / 100)}"/>
+    </svg>
+    <span class="ring-label ltr-num" style="inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--accent)">${pct}%</span>
+  </div>`;
+}
+
+/** First strength day (in weekday order, starting today) not yet completed this week. */
+function findNextStrengthDayId(todayIdx, completedThisWeek) {
+  const list = weekActivityList();
+  for (let offset = 0; offset < 7; offset++) {
+    const act = list[(todayIdx + offset) % 7].activity;
+    if (act.kind === 'strength' && !completedThisWeek.has(act.dayId)) return act.dayId;
+  }
+  return null;
 }
 
 function weekChip(d, isToday) {
@@ -87,16 +116,24 @@ function weekChip(d, isToday) {
   </div>`;
 }
 
-function dayCard(d, doneThisWeek) {
-  const tone = doneThisWeek ? 'good' : 'neutral';
-  const statusLabel = doneThisWeek ? 'הושלם השבוע' : 'מתוכנן';
-  return `<div class="card clickable" data-day="${d.id}">
-    <div class="row row--between">
-      <p class="h3">${esc(d.name)}</p>
-      ${statusChip(tone, statusLabel)}
+function dayCard(d, doneThisWeek, isNext) {
+  const heroId = d.exerciseIds.map(id => FORMA_DB.getExercise(id)).find(e => e?.videoYoutubeId)?.videoYoutubeId;
+  const thumb = heroId
+    ? `<img src="https://i.ytimg.com/vi/${esc(heroId)}/hqdefault.jpg" alt="" loading="lazy" />`
+    : `<span class="thumb-fallback">${ICONS.training}</span>`;
+  const badge = doneThisWeek
+    ? `<span class="day-thumb-badge day-thumb-badge--done" title="הושלם השבוע">${ICONS.check}</span>`
+    : '';
+  const tag = doneThisWeek ? statusChip('good', 'הושלם השבוע') : isNext ? statusChip('mid', 'האימון הבא') : statusChip('neutral', 'מתוכנן');
+  return `<div class="day-thumb-card ${isNext ? 'next' : ''} ${doneThisWeek ? 'done' : ''}" data-day="${d.id}">
+    <div class="thumb">${thumb}${badge}</div>
+    <div class="day-thumb-body">
+      <div class="row row--between">
+        <p class="h3">${esc(d.name)}</p>
+      </div>
+      <p class="body-sm mt-1 muted">${d.expectedDurationMin ? `כ-${d.expectedDurationMin} דקות · ` : ''}${d.exerciseIds.length} תרגילים</p>
+      <div class="mt-2">${tag}</div>
     </div>
-    <p class="body-sm mt-2">${esc(d.focus || '')}</p>
-    <p class="body-sm mt-1 muted">${d.expectedDurationMin ? `כ-${d.expectedDurationMin} דקות · ` : ''}${d.exerciseIds.length} תרגילים</p>
   </div>`;
 }
 

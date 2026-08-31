@@ -62,3 +62,12 @@ function currentBlockWeek() {
   const weekInCycle = Math.floor(diffDays / 7) % 6;
   return PROGRAM_BLOCK_WEEKS[weekInCycle];
 }
+
+/** How far through the current 6-week cycle we are, 1–100. */
+function currentBlockProgressPct() {
+  const start = new Date(getBlockStartDate() + 'T00:00:00');
+  const now = new Date();
+  const diffDays = Math.max(0, Math.floor((now - start) / 86400000));
+  const dayInCycle = diffDays % 42;
+  return Math.round(((dayInCycle + 1) / 42) * 100);
+}
