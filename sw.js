@@ -1,14 +1,14 @@
 /* FORMA — service worker. App-shell cache-first so a workout can be started,
    logged, and a rest timer run with zero network (PRD 5.3, 15.1, 16.1). */
 
-const CACHE_NAME = 'forma-shell-v5';
+const CACHE_NAME = 'forma-shell-v6';
 const PRECACHE = [
   './', './index.html', './styles.css', './manifest.webmanifest',
   './js/seed-data.js', './js/exercise-library.js', './js/icons.js', './js/db.js', './js/safety.js',
   './js/domain-recovery.js', './js/domain-progression.js', './js/domain-measurements.js', './js/domain-training-load.js',
   './js/domain-schedule.js', './js/domain-gamification.js',
   './js/nutrition-content.js', './js/domain-nutrition.js',
-  './js/ai-config.js', './js/coach-engine.js', './js/charts.js', './js/body-atlas.js',
+  './js/ai-config.js', './js/gemini-direct.js', './js/coach-engine.js', './js/charts.js', './js/body-atlas.js',
   './js/views/_registry.js', './js/views/onboarding.js', './js/views/today.js', './js/views/recovery-check.js',
   './js/views/training.js', './js/views/workout-live.js', './js/views/progress.js', './js/views/coach.js',
   './js/views/nutrition.js', './js/views/profile.js', './js/views/settings.js',

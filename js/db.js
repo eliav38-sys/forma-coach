@@ -244,6 +244,8 @@ const FORMA_DB = (() => {
   }
 
   // ---- export / wipe ----------------------------------------------------
+  /** Note: the Gemini API key is deliberately NOT in KEYS, so it can never end
+      up inside an export file that gets shared or backed up somewhere. */
   function exportAll() {
     const dump = {};
     Object.values(KEYS).forEach(k => { dump[k] = readRaw(k, null); });
@@ -252,6 +254,9 @@ const FORMA_DB = (() => {
   }
   function wipeAll() {
     Object.values(KEYS).forEach(k => localStorage.removeItem(NS + k));
+    // Wiping the account must also revoke the locally stored API key —
+    // it lives outside KEYS, so it would otherwise survive a full wipe.
+    if (typeof clearGeminiKey === 'function') clearGeminiKey();
     emit('change', { key: 'all' });
   }
   function wipeCategory(cat) {

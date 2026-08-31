@@ -124,20 +124,39 @@ const FORMA_COACH = (() => {
     };
   }
 
-  /** Tries the live model first (if configured), transparently falls back to
-      the local rule-based engine on any network/offline/server failure. */
+  /** Is a live model reachable at all right now? Used by the UI to decide
+      whether to show the "thinking" state and the live badge. */
+  function liveAvailable() {
+    return !!FORMA_AI_WORKER_URL || (typeof hasGeminiKey === 'function' && hasGeminiKey());
+  }
+
+  /** Tries the live model first, transparently falling back to the local
+      rule-based engine on any network/offline/quota/server failure.
+
+      Order is deliberate: the Worker (key held server-side) is preferred when
+      it is configured; the direct browser→Gemini path is the lighter-setup
+      alternative. Either way the local engine is the floor, so the Coach is
+      never silent and never blocks on the network. */
   async function askSmart(text, context = {}) {
     const safetyHit = checkTextSafety(text);
     if (safetyHit.stopWorkout || safetyHit.seekProfessionalHelp) {
       return respond({ direct: safetyHit.message, confidence: 'high', safety: { stop_workout: safetyHit.stopWorkout, seek_professional_help: true, message: safetyHit.message } });
     }
-    if (FORMA_AI_WORKER_URL && text) {
-      try {
-        const ctx = buildContext();
-        const live = await askLive(text, ctx);
-        return live;
-      } catch (e) {
-        console.warn('FORMA live coach unavailable, using local reasoning:', e.message);
+
+    if (text && liveAvailable()) {
+      const ctx = buildContext();
+      if (FORMA_AI_WORKER_URL) {
+        try { return await askLive(text, ctx); }
+        catch (e) { console.warn('FORMA worker coach unavailable:', e.message); }
+      }
+      if (typeof askGeminiDirect === 'function' && hasGeminiKey()) {
+        try { return await askGeminiDirect(text, buildCoachContextText(ctx)); }
+        catch (e) {
+          console.warn('FORMA Gemini coach unavailable:', e.message);
+          // Surface a quota/key problem once rather than silently degrading
+          // forever — the user can't fix what they can't see.
+          if (e.userMessage && typeof FORMA_APP !== 'undefined') FORMA_APP.toast(e.userMessage);
+        }
       }
     }
     return ask(text, context);
@@ -353,5 +372,5 @@ const FORMA_COACH = (() => {
     return { headline, bullets };
   }
 
-  return { QUICK_PROMPTS, matchIntent, ask, askSmart, buildCoachContextText, buildPeriodSummary, buildContext };
+  return { QUICK_PROMPTS, matchIntent, ask, askSmart, liveAvailable, buildCoachContextText, buildPeriodSummary, buildContext };
 })();
